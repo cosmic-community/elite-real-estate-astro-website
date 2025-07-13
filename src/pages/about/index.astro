@@ -7,32 +7,58 @@ import type { Agent } from '../../types';
 const aboutPage = await getAboutPage();
 const agents = await getAgents();
 const featuredAgents = agents.slice(0, 3);
+
+// Parse values JSON if it exists
+let values: Array<{title: string, description: string, icon: string}> = [];
+if (aboutPage?.metadata?.values) {
+	try {
+		values = JSON.parse(aboutPage.metadata.values);
+	} catch (e) {
+		console.error('Error parsing values JSON:', e);
+		values = [];
+	}
+}
 ---
 
 <Layout title="About Us - Elite Real Estate">
 	<main>
-		<!-- Page Header -->
-		<section class="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
-			<div class="max-w-7xl mx-auto px-4">
-				<h1 class="text-4xl md:text-5xl font-bold mb-4">About Elite Real Estate</h1>
-				<p class="text-xl">Leading luxury real estate professionals since 2003</p>
-			</div>
-		</section>
+		<!-- Hero Section -->
+		{aboutPage?.metadata?.hero_title && (
+			<section class="relative bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
+				{aboutPage.metadata.hero_image && (
+					<div class="absolute inset-0 bg-black bg-opacity-50">
+						<img 
+							src={`${aboutPage.metadata.hero_image.imgix_url}?w=1920&h=800&fit=crop&auto=format,compress`}
+							alt="About Hero"
+							class="w-full h-full object-cover"
+						/>
+					</div>
+				)}
+				<div class="relative max-w-7xl mx-auto px-4">
+					<h1 class="text-4xl md:text-5xl font-bold mb-4">{aboutPage.metadata.hero_title}</h1>
+					{aboutPage.metadata.hero_subtitle && (
+						<p class="text-xl max-w-3xl">{aboutPage.metadata.hero_subtitle}</p>
+					)}
+				</div>
+			</section>
+		)}
 
-		<!-- About Content -->
-		{aboutPage ? (
+		<!-- Company Story Section -->
+		{aboutPage?.metadata?.story_title && (
 			<section class="py-16">
 				<div class="max-w-7xl mx-auto px-4">
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
 						<div>
-							<h2 class="text-3xl font-bold text-gray-900 mb-6">{aboutPage.title}</h2>
-							<div class="prose prose-lg max-w-none text-gray-600" set:html={aboutPage.metadata?.content}></div>
+							<h2 class="text-3xl font-bold text-gray-900 mb-6">{aboutPage.metadata.story_title}</h2>
+							{aboutPage.metadata.story_content && (
+								<div class="prose prose-lg max-w-none text-gray-600" set:html={aboutPage.metadata.story_content}></div>
+							)}
 						</div>
-						{aboutPage.metadata?.hero_image && (
+						{aboutPage.metadata.story_image && (
 							<div>
 								<img 
-									src={`${aboutPage.metadata.hero_image.imgix_url}?w=800&h=600&fit=crop&auto=format,compress`}
-									alt={aboutPage.title}
+									src={`${aboutPage.metadata.story_image.imgix_url}?w=800&h=600&fit=crop&auto=format,compress`}
+									alt="Our Story"
 									class="rounded-lg shadow-lg w-full h-96 object-cover"
 								/>
 							</div>
@@ -40,103 +66,91 @@ const featuredAgents = agents.slice(0, 3);
 					</div>
 				</div>
 			</section>
-		) : (
-			<!-- Default About Content -->
-			<section class="py-16">
-				<div class="max-w-7xl mx-auto px-4">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-						<div>
-							<h2 class="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-							<p class="text-lg text-gray-600 mb-6">
-								Founded in 2003, Elite Real Estate has established itself as the premier luxury real estate firm in the region. With over two decades of experience, we specialize in connecting discerning clients with exceptional properties that define luxury living.
-							</p>
-							<p class="text-lg text-gray-600 mb-6">
-								Our team of expert agents brings unparalleled market knowledge, personalized service, and a commitment to excellence that has earned us the trust of clients seeking the finest properties in prime locations.
-							</p>
-							<p class="text-lg text-gray-600">
-								From stunning waterfront estates to prestigious commercial developments, we offer an exclusive portfolio of premium properties and comprehensive real estate services that exceed expectations.
-							</p>
-						</div>
-						<div>
-							<img 
-								src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop&auto=format,compress"
-								alt="Elite Real Estate Office"
-								class="rounded-lg shadow-lg w-full h-96 object-cover"
-							/>
-						</div>
-					</div>
+		)}
+
+		<!-- Mission Statement Section -->
+		{aboutPage?.metadata?.mission_statement && (
+			<section class="py-16 bg-gray-50">
+				<div class="max-w-4xl mx-auto px-4 text-center">
+					<h2 class="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
+					<p class="text-xl text-gray-600 leading-relaxed">{aboutPage.metadata.mission_statement}</p>
 				</div>
 			</section>
 		)}
 
 		<!-- Values Section -->
-		<section class="py-16 bg-gray-50">
-			<div class="max-w-7xl mx-auto px-4">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
-					<p class="text-xl text-gray-600">The principles that guide everything we do</p>
-				</div>
-				
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-					<div class="text-center">
-						<div class="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-gray-900 mb-4">Excellence</h3>
-						<p class="text-gray-600">We strive for perfection in every aspect of our service, from initial consultation to final closing.</p>
-					</div>
-					
-					<div class="text-center">
-						<div class="w-16 h-16 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-6">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-gray-900 mb-4">Integrity</h3>
-						<p class="text-gray-600">Honest, transparent communication and ethical practices form the foundation of all our relationships.</p>
-					</div>
-					
-					<div class="text-center">
-						<div class="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-gray-900 mb-4">Partnership</h3>
-						<p class="text-gray-600">We view every client relationship as a partnership, working together to achieve your real estate goals.</p>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Team Section -->
-		{featuredAgents.length > 0 && (
+		{values.length > 0 && (
 			<section class="py-16">
 				<div class="max-w-7xl mx-auto px-4">
 					<div class="text-center mb-12">
-						<h2 class="text-3xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
-						<p class="text-xl text-gray-600">Expert agents dedicated to your success</p>
+						<h2 class="text-3xl font-bold text-gray-900 mb-4">
+							{aboutPage?.metadata?.values_title || 'Our Values'}
+						</h2>
+						<p class="text-xl text-gray-600">The principles that guide everything we do</p>
 					</div>
 					
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-						{featuredAgents.map((agent: Agent) => (
-							<AgentCard agent={agent} />
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+						{values.map((value) => (
+							<div class="text-center">
+								<div class="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
+									<span class="text-2xl">{value.icon}</span>
+								</div>
+								<h3 class="text-xl font-bold text-gray-900 mb-4">{value.title}</h3>
+								<p class="text-gray-600">{value.description}</p>
+							</div>
 						))}
-					</div>
-					
-					<div class="text-center">
-						<a href="/agents" class="bg-blue-900 hover:bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold transition duration-300">
-							View All Agents
-						</a>
 					</div>
 				</div>
 			</section>
 		)}
 
+		<!-- Team Section -->
+		{aboutPage?.metadata?.team_title && (
+			<section class="py-16 bg-gray-50">
+				<div class="max-w-7xl mx-auto px-4">
+					<div class="text-center mb-12">
+						<h2 class="text-3xl font-bold text-gray-900 mb-4">{aboutPage.metadata.team_title}</h2>
+						{aboutPage.metadata.team_description && (
+							<p class="text-xl text-gray-600 max-w-3xl mx-auto">{aboutPage.metadata.team_description}</p>
+						)}
+					</div>
+					
+					{featuredAgents.length > 0 && (
+						<>
+							<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+								{featuredAgents.map((agent: Agent) => (
+									<AgentCard agent={agent} />
+								))}
+							</div>
+							
+							<div class="text-center">
+								<a href="/agents" class="bg-blue-900 hover:bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold transition duration-300">
+									View All Agents
+								</a>
+							</div>
+						</>
+					)}
+				</div>
+			</section>
+		)}
+
+		<!-- CTA Section -->
+		{aboutPage?.metadata?.cta_title && (
+			<section class="py-16 bg-blue-900 text-white">
+				<div class="max-w-4xl mx-auto px-4 text-center">
+					<h2 class="text-3xl font-bold mb-6">{aboutPage.metadata.cta_title}</h2>
+					{aboutPage.metadata.cta_description && (
+						<p class="text-xl mb-8">{aboutPage.metadata.cta_description}</p>
+					)}
+					<a href="/contact" class="bg-white text-blue-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition duration-300">
+						Contact Us Today
+					</a>
+				</div>
+			</section>
+		)}
+
 		<!-- Stats Section -->
-		<section class="py-16 bg-blue-900 text-white">
+		<section class="py-16 bg-gray-900 text-white">
 			<div class="max-w-7xl mx-auto px-4">
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
 					<div>

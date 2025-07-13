@@ -1,125 +1,87 @@
-import { createBucketClient } from '@cosmicjs/sdk'
+import { createBucketClient } from '@cosmicjs/sdk';
+import type { Property, Agent, Office, AboutPage } from '../types';
 
-export const cosmic = createBucketClient({
-  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
-  readKey: import.meta.env.COSMIC_READ_KEY,
-  writeKey: import.meta.env.COSMIC_WRITE_KEY,
-  apiEnvironment: 'staging'
-})
+const cosmic = createBucketClient({
+  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG || 'real-estate-production',
+  readKey: import.meta.env.COSMIC_READ_KEY || 'a1CXVzlrA8llpCCG0ohEd1bhROTJwpJugqw5tyLLZJWQuyZVtn',
+});
 
-// Helper function for error handling
-function hasStatus(error: unknown): error is { status: number } {
-  return typeof error === 'object' && error !== null && 'status' in error;
-}
-
-// Get all properties with agent information
-export async function getProperties() {
+export async function getProperties(): Promise<Property[]> {
   try {
     const response = await cosmic.objects
       .find({ type: 'properties' })
       .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.objects
+      .depth(1);
+    
+    return response.objects as Property[];
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return []
-    }
-    throw new Error('Failed to fetch properties')
+    console.error('Error fetching properties:', error);
+    return [];
   }
 }
 
-// Get single property by slug
-export async function getProperty(slug: string) {
+export async function getProperty(slug: string): Promise<Property | null> {
   try {
     const response = await cosmic.objects
       .findOne({ type: 'properties', slug })
-      .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.object
+      .depth(1);
+    
+    return response.object as Property;
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return null
-    }
-    throw new Error('Failed to fetch property')
+    console.error('Error fetching property:', error);
+    return null;
   }
 }
 
-// Get all agents with office information
-export async function getAgents() {
+export async function getAgents(): Promise<Agent[]> {
   try {
     const response = await cosmic.objects
       .find({ type: 'agents' })
       .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.objects
+      .depth(1);
+    
+    return response.objects as Agent[];
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return []
-    }
-    throw new Error('Failed to fetch agents')
+    console.error('Error fetching agents:', error);
+    return [];
   }
 }
 
-// Get single agent by slug
-export async function getAgent(slug: string) {
+export async function getAgent(slug: string): Promise<Agent | null> {
   try {
     const response = await cosmic.objects
       .findOne({ type: 'agents', slug })
-      .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.object
+      .depth(1);
+    
+    return response.object as Agent;
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return null
-    }
-    throw new Error('Failed to fetch agent')
+    console.error('Error fetching agent:', error);
+    return null;
   }
 }
 
-// Get about page content
-export async function getAboutPage() {
-  try {
-    const response = await cosmic.objects
-      .findOne({ type: 'about-page' })
-      .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.object
-  } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return null
-    }
-    throw new Error('Failed to fetch about page')
-  }
-}
-
-// Get all offices
-export async function getOffices() {
+export async function getOffices(): Promise<Office[]> {
   try {
     const response = await cosmic.objects
       .find({ type: 'offices' })
-      .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.objects
+      .props(['id', 'title', 'slug', 'metadata']);
+    
+    return response.objects as Office[];
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return []
-    }
-    throw new Error('Failed to fetch offices')
+    console.error('Error fetching offices:', error);
+    return [];
   }
 }
 
-// Get properties by agent
-export async function getPropertiesByAgent(agentId: string) {
+export async function getAboutPage(): Promise<AboutPage | null> {
   try {
     const response = await cosmic.objects
-      .find({ type: 'properties', 'metadata.listing_agent': agentId })
-      .props(['id', 'title', 'slug', 'metadata'])
-      .depth(1)
-    return response.objects
+      .findOne({ type: 'about-page' })
+      .depth(1);
+    
+    return response.object as AboutPage;
   } catch (error) {
-    if (hasStatus(error) && error.status === 404) {
-      return []
-    }
-    throw new Error('Failed to fetch agent properties')
+    console.error('Error fetching about page:', error);
+    return null;
   }
 }

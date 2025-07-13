@@ -71,10 +71,23 @@ export interface Office extends CosmicObject {
 
 export interface AboutPage extends CosmicObject {
   metadata: {
-    content: string;
+    hero_title: string;
+    hero_subtitle: string;
     hero_image?: {
       imgix_url: string;
     };
+    story_title: string;
+    story_content: string;
+    story_image?: {
+      imgix_url: string;
+    };
+    mission_statement: string;
+    values_title: string;
+    values: string; // JSON string containing array of value objects
+    team_title: string;
+    team_description: string;
+    cta_title: string;
+    cta_description: string;
   };
 }
 

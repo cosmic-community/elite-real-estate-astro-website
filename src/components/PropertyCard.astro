@@ -35,11 +35,11 @@ const hasAgent = property.metadata.listing_agent
     <!-- Status Badge -->
     <div class="absolute top-4 left-4">
       <span class={`px-3 py-1 text-xs font-semibold rounded-full ${
-        property.metadata.property_status.key === 'sale' ? 'bg-green-100 text-green-800' :
-        property.metadata.property_status.key === 'rent' ? 'bg-blue-100 text-blue-800' :
+        property.metadata.property_status?.key === 'sale' ? 'bg-green-100 text-green-800' :
+        property.metadata.property_status?.key === 'rent' ? 'bg-blue-100 text-blue-800' :
         'bg-gray-100 text-gray-800'
       }`}>
-        {property.metadata.property_status.value}
+        {property.metadata.property_status?.value || property.metadata.status}
       </span>
     </div>
 
@@ -56,7 +56,7 @@ const hasAgent = property.metadata.listing_agent
     <!-- Property Type -->
     <div class="flex items-center justify-between mb-2">
       <span class="text-sm font-medium text-primary-600">
-        {property.metadata.property_type.value}
+        {property.metadata.property_type}
       </span>
       {property.metadata.square_feet && (
         <span class="text-sm text-secondary-500">
@@ -101,7 +101,7 @@ const hasAgent = property.metadata.listing_agent
     {property.metadata.features && property.metadata.features.length > 0 && (
       <div class="mb-4">
         <div class="flex flex-wrap gap-2">
-          {property.metadata.features.slice(0, 3).map((feature) => (
+          {property.metadata.features.slice(0, 3).map((feature: string) => (
             <span class="px-2 py-1 text-xs bg-secondary-100 text-secondary-700 rounded-full">
               {feature}
             </span>

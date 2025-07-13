@@ -50,7 +50,7 @@ const { agent } = Astro.props
       <div class="mb-4">
         <h4 class="text-sm font-medium text-secondary-900 mb-2">Specialties</h4>
         <div class="flex flex-wrap gap-2">
-          {agent.metadata.specialties.map((specialty) => (
+          {agent.metadata.specialties.map((specialty: string) => (
             <span class="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full">
               {specialty}
             </span>
@@ -83,7 +83,7 @@ const { agent } = Astro.props
         </div>
       )}
 
-      {agent.metadata.office && (
+      {agent.metadata.office?.metadata?.office_name && (
         <div class="flex items-center text-sm text-secondary-600">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />

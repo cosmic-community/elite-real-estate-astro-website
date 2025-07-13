@@ -1,0 +1,161 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { cosmic } from '../../lib/cosmic';
+
+let aboutContent: any = null;
+let error: string | null = null;
+
+try {
+  const response = await cosmic.objects
+    .findOne({ type: 'pages', slug: 'about' })
+    .props(['title', 'content', 'metadata'])
+    .depth(1);
+  aboutContent = response.object;
+} catch (e) {
+  if (e.status === 404) {
+    aboutContent = null;
+  } else {
+    console.error('Error fetching about content:', e);
+    error = 'Failed to load page content';
+  }
+}
+
+// Default content if no CMS content is available
+const defaultContent = {
+  title: 'About Elite Real Estate',
+  hero_title: 'Your Trusted Real Estate Partner',
+  hero_subtitle: 'With over 20 years of experience in luxury real estate, we\'ve helped thousands of clients find their perfect homes and investment properties.',
+  mission_title: 'Our Mission',
+  mission_content: 'At Elite Real Estate, our mission is to provide exceptional service and expertise to every client. We believe that buying or selling a home should be an exciting and rewarding experience, not a stressful one.',
+  values: [
+    {
+      title: 'Integrity',
+      description: 'We conduct business with honesty and transparency in every transaction.'
+    },
+    {
+      title: 'Excellence',
+      description: 'We strive for excellence in everything we do, from marketing to client service.'
+    },
+    {
+      title: 'Innovation',
+      description: 'We leverage the latest technology and marketing strategies to serve our clients better.'
+    }
+  ]
+};
+
+const content = aboutContent?.metadata || defaultContent;
+---
+
+<Layout title="About Us - Elite Real Estate">
+  <main>
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            {content.hero_title || defaultContent.hero_title}
+          </h1>
+          <p class="text-xl md:text-2xl text-primary-100">
+            {content.hero_subtitle || defaultContent.hero_subtitle}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-secondary-800 mb-6">
+              {content.mission_title || defaultContent.mission_title}
+            </h2>
+            <p class="text-lg text-secondary-600 leading-relaxed">
+              {content.mission_content || defaultContent.mission_content}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="py-16 bg-secondary-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-secondary-800 mb-4">
+            Our Core Values
+          </h2>
+          <p class="text-lg text-secondary-600">
+            The principles that guide everything we do
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {(content.values || defaultContent.values).map((value: any) => (
+            <div class="bg-white rounded-lg p-8 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 class="text-xl font-semibold text-secondary-800 mb-4">
+                {value.title}
+              </h3>
+              <p class="text-secondary-600">
+                {value.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-secondary-800 mb-4">
+            Our Track Record
+          </h2>
+          <p class="text-lg text-secondary-600">
+            Numbers that speak to our success
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="text-center">
+            <div class="text-4xl font-bold text-primary-600 mb-2">20+</div>
+            <div class="text-secondary-600">Years Experience</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl font-bold text-primary-600 mb-2">2,500+</div>
+            <div class="text-secondary-600">Homes Sold</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl font-bold text-primary-600 mb-2">98%</div>
+            <div class="text-secondary-600">Client Satisfaction</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl font-bold text-primary-600 mb-2">$2B+</div>
+            <div class="text-secondary-600">Total Sales Volume</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary-600 py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+          Ready to Experience the Elite Difference?
+        </h2>
+        <p class="text-lg text-primary-100 mb-8">
+          Let us help you navigate your next real estate transaction with confidence and expertise.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors duration-200">
+            Contact Us Today
+          </a>
+          <a href="/properties" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-colors duration-200">
+            View Properties
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

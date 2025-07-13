@@ -1,0 +1,100 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AgentCard from '../../components/AgentCard.astro';
+import { cosmic } from '../../lib/cosmic';
+import type { Agent } from '../../types';
+
+let agents: Agent[] = [];
+let error: string | null = null;
+
+try {
+  const response = await cosmic.objects
+    .find({ type: 'agents' })
+    .props(['title', 'slug', 'metadata'])
+    .depth(1);
+  agents = response.objects;
+} catch (e) {
+  if (e.status === 404) {
+    agents = [];
+  } else {
+    console.error('Error fetching agents:', e);
+    error = 'Failed to load agents';
+  }
+}
+---
+
+<Layout title="Our Agents - Elite Real Estate">
+  <main>
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+          Meet Our Expert Agents
+        </h1>
+        <p class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto">
+          Our team of experienced real estate professionals is dedicated to helping you find your perfect home or investment property.
+        </p>
+      </div>
+    </section>
+
+    <!-- Agents Grid -->
+    <section class="py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {error ? (
+          <div class="text-center py-12">
+            <p class="text-red-600 text-lg">{error}</p>
+          </div>
+        ) : agents.length === 0 ? (
+          <div class="text-center py-12">
+            <h2 class="text-2xl font-semibold text-secondary-800 mb-4">
+              Coming Soon
+            </h2>
+            <p class="text-secondary-600">
+              Our agent profiles are being updated. Please check back soon or contact us directly.
+            </p>
+            <a href="/contact" class="btn-primary mt-6 inline-block">
+              Contact Us
+            </a>
+          </div>
+        ) : (
+          <>
+            <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-bold text-secondary-800 mb-4">
+                Our Professional Team
+              </h2>
+              <p class="text-lg text-secondary-600 max-w-2xl mx-auto">
+                Each of our agents brings years of experience and local market knowledge to help you achieve your real estate goals.
+              </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {agents.map((agent) => (
+                <AgentCard agent={agent} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-secondary-50 py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-secondary-800 mb-6">
+          Ready to Work with Our Team?
+        </h2>
+        <p class="text-lg text-secondary-600 mb-8">
+          Whether you're buying, selling, or investing, our agents are here to guide you through every step of the process.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="btn-primary">
+            Get in Touch
+          </a>
+          <a href="/properties" class="btn-secondary">
+            View Properties
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

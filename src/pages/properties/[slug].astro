@@ -1,3 +1,4 @@
+// src/pages/properties/[slug].astro
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getProperty, getProperties } from '../../lib/cosmic';
@@ -68,7 +69,7 @@ const formattedPrice = new Intl.NumberFormat('en-US', {
 						{images && images.length > 0 && (
 							<div class="mb-8">
 								<img 
-									src={`${images[0].imgix_url}?w=800&h=600&fit=crop&auto=format,compress`}
+									src={`${images[0]?.imgix_url}?w=800&h=600&fit=crop&auto=format,compress`}
 									alt={title}
 									class="w-full h-96 object-cover rounded-lg shadow-lg mb-4"
 								/>

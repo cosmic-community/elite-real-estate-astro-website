@@ -33,6 +33,23 @@ export async function getProperty(slug: string): Promise<Property | null> {
   }
 }
 
+export async function getPropertiesByAgent(agentId: string): Promise<Property[]> {
+  try {
+    const response = await cosmic.objects
+      .find({ 
+        type: 'properties',
+        'metadata.listing_agent': agentId 
+      })
+      .props(['id', 'title', 'slug', 'metadata'])
+      .depth(1);
+    
+    return response.objects as Property[];
+  } catch (error) {
+    console.error('Error fetching properties by agent:', error);
+    return [];
+  }
+}
+
 export async function getAgents(): Promise<Agent[]> {
   try {
     const response = await cosmic.objects

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import PropertyCard from '../components/PropertyCard.astro';
 import { getProperties } from '../lib/cosmic';
+import type { Property } from '../types';
 
 const properties = await getProperties();
 const featuredProperties = properties.slice(0, 6);
@@ -31,7 +32,7 @@ const featuredProperties = properties.slice(0, 6);
 				
 				{featuredProperties.length > 0 ? (
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{featuredProperties.map((property) => (
+						{featuredProperties.map((property: Property) => (
 							<PropertyCard property={property} />
 						))}
 					</div>

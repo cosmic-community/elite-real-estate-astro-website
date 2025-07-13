@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import AgentCard from '../../components/AgentCard.astro';
 import { getAboutPage, getAgents } from '../../lib/cosmic';
+import type { Agent } from '../../types';
 
 const aboutPage = await getAboutPage();
 const agents = await getAgents();
@@ -120,7 +121,7 @@ const featuredAgents = agents.slice(0, 3);
 					</div>
 					
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-						{featuredAgents.map((agent) => (
+						{featuredAgents.map((agent: Agent) => (
 							<AgentCard agent={agent} />
 						))}
 					</div>

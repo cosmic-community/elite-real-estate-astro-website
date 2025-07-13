@@ -1,10 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getProperty, getProperties } from '../../lib/cosmic';
+import type { Property, ImageObject } from '../../types';
 
 export async function getStaticPaths() {
 	const properties = await getProperties();
-	return properties.map(property => ({
+	return properties.map((property: Property) => ({
 		params: { slug: property.slug },
 		props: { property }
 	}));
@@ -73,7 +74,7 @@ const formattedPrice = new Intl.NumberFormat('en-US', {
 								/>
 								{images.length > 1 && (
 									<div class="grid grid-cols-4 gap-2">
-										{images.slice(1, 5).map((image, index) => (
+										{images.slice(1, 5).map((image: ImageObject, index: number) => (
 											<img 
 												src={`${image.imgix_url}?w=200&h=150&fit=crop&auto=format,compress`}
 												alt={`${title} - Image ${index + 2}`}

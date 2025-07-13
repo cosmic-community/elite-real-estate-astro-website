@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import AgentCard from '../../components/AgentCard.astro';
 import { getAgents } from '../../lib/cosmic';
+import type { Agent } from '../../types';
 
 const agents = await getAgents();
 ---
@@ -21,7 +22,7 @@ const agents = await getAgents();
 			<div class="max-w-7xl mx-auto px-4">
 				{agents.length > 0 ? (
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{agents.map((agent) => (
+						{agents.map((agent: Agent) => (
 							<AgentCard agent={agent} />
 						))}
 					</div>

@@ -1,9 +1,9 @@
 ---
-// src/pages/index.astro
 import Layout from '../layouts/Layout.astro'
 import PropertyCard from '../components/PropertyCard.astro'
 import AgentCard from '../components/AgentCard.astro'
 import { getProperties, getAgents } from '../lib/cosmic'
+import type { Property, Agent } from '../types'
 
 const properties = await getProperties()
 const agents = await getAgents()
@@ -79,7 +79,7 @@ const featuredAgents = agents.slice(0, 3)
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredProperties.map((property) => (
+          {featuredProperties.map((property: Property) => (
             <PropertyCard property={property} />
           ))}
         </div>
@@ -154,7 +154,7 @@ const featuredAgents = agents.slice(0, 3)
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredAgents.map((agent) => (
+          {featuredAgents.map((agent: Agent) => (
             <AgentCard agent={agent} />
           ))}
         </div>

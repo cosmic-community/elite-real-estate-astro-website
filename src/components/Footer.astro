@@ -1,6 +1,6 @@
 ---
-// src/components/Footer.astro
 import { getOffices } from '../lib/cosmic'
+import type { Office } from '../types'
 
 const offices = await getOffices()
 const currentYear = new Date().getFullYear()
@@ -54,7 +54,7 @@ const currentYear = new Date().getFullYear()
       {offices.length > 0 && (
         <div>
           <h4 class="text-lg font-semibold text-white mb-4">Our Office</h4>
-          {offices.map((office) => (
+          {offices.map((office: Office) => (
             <div class="text-secondary-300">
               <h5 class="font-medium text-white mb-2">{office.metadata.office_name}</h5>
               <p class="text-sm whitespace-pre-line mb-2">{office.metadata.address}</p>

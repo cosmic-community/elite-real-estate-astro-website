@@ -16,18 +16,18 @@ export interface Property extends CosmicObject {
     bedrooms: number;
     bathrooms: number;
     square_feet?: number;
-    property_type: string;
-    property_status: {
+    property_type: string | {
       key: string;
       value: string;
     };
-    status: 'For Sale' | 'Sold' | 'Under Contract';
+    property_status?: {
+      key: string;
+      value: string;
+    };
+    status?: 'For Sale' | 'For Rent' | 'Sold' | 'Under Contract';
     description: string;
-    images?: Array<{
-      imgix_url: string;
-      title?: string;
-    }>;
     gallery?: Array<{
+      url: string;
       imgix_url: string;
       title?: string;
     }>;
@@ -44,9 +44,11 @@ export interface Agent extends CosmicObject {
     phone?: string;
     email?: string;
     photo?: {
+      url: string;
       imgix_url: string;
     };
     profile_image?: {
+      url: string;
       imgix_url: string;
     };
     specialties?: string[];
@@ -92,6 +94,7 @@ export interface AboutPage extends CosmicObject {
 }
 
 export interface ImageObject {
+  url: string;
   imgix_url: string;
   title?: string;
 }

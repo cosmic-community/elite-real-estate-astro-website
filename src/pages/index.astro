@@ -1,0 +1,190 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro'
+import PropertyCard from '../components/PropertyCard.astro'
+import AgentCard from '../components/AgentCard.astro'
+import { getProperties, getAgents } from '../lib/cosmic'
+
+const properties = await getProperties()
+const agents = await getAgents()
+const featuredProperties = properties.slice(0, 3)
+const featuredAgents = agents.slice(0, 3)
+---
+
+<Layout title="Elite Real Estate - Luxury Properties & Expert Service">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white">
+    <div class="absolute inset-0">
+      <img 
+        src="https://imgix.cosmicjs.com/5593c320-602c-11f0-a051-23c10f41277a-photo-1560518883-ce09059eeffa-1752440397130.jpg?w=1920&h=1080&fit=crop&auto=format,compress"
+        alt="Luxury real estate"
+        class="w-full h-full object-cover opacity-20"
+      />
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+          Find Your Dream Home with Elite Real Estate
+        </h1>
+        <p class="text-xl lg:text-2xl text-blue-100 mb-8">
+          Over two decades of experience in luxury real estate. Trust, expertise, and unparalleled service.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/properties" class="btn-primary text-lg px-8 py-4">
+            Browse Properties
+          </a>
+          <a href="/contact" class="btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary-700">
+            Contact Us
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-16 bg-secondary-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">20+</div>
+          <div class="text-secondary-600">Years Experience</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">50+</div>
+          <div class="text-secondary-600">Team Members</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">1000+</div>
+          <div class="text-secondary-600">Happy Clients</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">500+</div>
+          <div class="text-secondary-600">Properties Sold</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Properties -->
+  {featuredProperties.length > 0 && (
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+            Featured Properties
+          </h2>
+          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+            Discover our hand-picked selection of luxury properties in the most desirable locations.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {featuredProperties.map((property) => (
+            <PropertyCard property={property} />
+          ))}
+        </div>
+        
+        <div class="text-center">
+          <a href="/properties" class="btn-primary text-lg px-8 py-4">
+            View All Properties
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Our Expertise -->
+  <section class="py-16 bg-secondary-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+          Our Expertise
+        </h2>
+        <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+          We specialize in providing comprehensive real estate services tailored to your needs.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h6v6H9z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-secondary-900 mb-2">Luxury Homes</h3>
+          <p class="text-secondary-600">Exceptional luxury properties in prestigious neighborhoods</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-secondary-900 mb-2">First-Time Buyers</h3>
+          <p class="text-secondary-600">Guiding first-time buyers through every step of the process</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-secondary-900 mb-2">Investment Properties</h3>
+          <p class="text-secondary-600">Maximizing returns on real estate investments</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Agents -->
+  {featuredAgents.length > 0 && (
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+            Meet Our Expert Team
+          </h2>
+          <p class="text-xl text-secondary-600 max-w-2xl mx-auto">
+            Our experienced agents bring together diverse expertise in luxury markets and client relations.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {featuredAgents.map((agent) => (
+            <AgentCard agent={agent} />
+          ))}
+        </div>
+        
+        <div class="text-center">
+          <a href="/agents" class="btn-primary text-lg px-8 py-4">
+            Meet All Agents
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Call to Action -->
+  <section class="py-16 bg-primary-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+        Ready to Find Your Dream Home?
+      </h2>
+      <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+        Whether you're buying, selling, or investing in real estate, our team is here to guide you through every step of the process.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn bg-white text-primary-700 hover:bg-blue-50 text-lg px-8 py-4">
+          Contact Us Today
+        </a>
+        <a href="/properties" class="btn-outline border-white text-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4">
+          Browse Properties
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

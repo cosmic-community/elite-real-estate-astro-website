@@ -1,0 +1,147 @@
+---
+// src/components/PropertyCard.astro
+import type { Property } from '../types'
+import { formatPrice, formatSquareFeet } from '../types'
+
+export interface Props {
+  property: Property
+}
+
+const { property } = Astro.props
+const primaryImage = property.metadata.gallery?.[0]
+const hasAgent = property.metadata.listing_agent
+---
+
+<div class="card-hover group">
+  <!-- Property Image -->
+  <div class="relative overflow-hidden">
+    {primaryImage ? (
+      <img 
+        src={`${primaryImage.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`}
+        alt={property.title}
+        class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+        width="300"
+        height="200"
+      />
+    ) : (
+      <div class="w-full h-64 bg-secondary-200 flex items-center justify-center">
+        <svg class="w-16 h-16 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h6v6H9z" />
+        </svg>
+      </div>
+    )}
+    
+    <!-- Status Badge -->
+    <div class="absolute top-4 left-4">
+      <span class={`px-3 py-1 text-xs font-semibold rounded-full ${
+        property.metadata.property_status.key === 'sale' ? 'bg-green-100 text-green-800' :
+        property.metadata.property_status.key === 'rent' ? 'bg-blue-100 text-blue-800' :
+        'bg-gray-100 text-gray-800'
+      }`}>
+        {property.metadata.property_status.value}
+      </span>
+    </div>
+
+    <!-- Price Badge -->
+    <div class="absolute top-4 right-4">
+      <span class="bg-white/90 backdrop-blur-sm px-3 py-1 text-sm font-bold text-secondary-900 rounded-lg">
+        {formatPrice(property.metadata.price)}
+      </span>
+    </div>
+  </div>
+
+  <!-- Property Details -->
+  <div class="p-6">
+    <!-- Property Type -->
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-medium text-primary-600">
+        {property.metadata.property_type.value}
+      </span>
+      {property.metadata.square_feet && (
+        <span class="text-sm text-secondary-500">
+          {formatSquareFeet(property.metadata.square_feet)} sq ft
+        </span>
+      )}
+    </div>
+
+    <!-- Title -->
+    <h3 class="text-xl font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors duration-200">
+      <a href={`/properties/${property.slug}`} class="hover:underline">
+        {property.title}
+      </a>
+    </h3>
+
+    <!-- Address -->
+    <p class="text-secondary-600 mb-4 flex items-start">
+      <svg class="w-4 h-4 mt-1 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      {property.metadata.address}
+    </p>
+
+    <!-- Property Stats -->
+    <div class="flex items-center space-x-6 mb-4 text-sm text-secondary-600">
+      <div class="flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+        </svg>
+        {property.metadata.bedrooms} bed{property.metadata.bedrooms !== 1 ? 's' : ''}
+      </div>
+      <div class="flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10a2 2 0 002 2h4a2 2 0 002-2V11m-6 0h6" />
+        </svg>
+        {property.metadata.bathrooms} bath{property.metadata.bathrooms !== 1 ? 's' : ''}
+      </div>
+    </div>
+
+    <!-- Features -->
+    {property.metadata.features && property.metadata.features.length > 0 && (
+      <div class="mb-4">
+        <div class="flex flex-wrap gap-2">
+          {property.metadata.features.slice(0, 3).map((feature) => (
+            <span class="px-2 py-1 text-xs bg-secondary-100 text-secondary-700 rounded-full">
+              {feature}
+            </span>
+          ))}
+          {property.metadata.features.length > 3 && (
+            <span class="px-2 py-1 text-xs bg-secondary-100 text-secondary-700 rounded-full">
+              +{property.metadata.features.length - 3} more
+            </span>
+          )}
+        </div>
+      </div>
+    )}
+
+    <!-- Agent Info -->
+    {hasAgent && (
+      <div class="flex items-center pt-4 border-t border-secondary-200">
+        {hasAgent.metadata.photo && (
+          <img 
+            src={`${hasAgent.metadata.photo.imgix_url}?w=80&h=80&fit=crop&auto=format,compress`}
+            alt={hasAgent.metadata.full_name}
+            class="w-10 h-10 rounded-full object-cover mr-3"
+            width="40"
+            height="40"
+          />
+        )}
+        <div>
+          <p class="text-sm font-medium text-secondary-900">
+            <a href={`/agents/${hasAgent.slug}`} class="hover:text-primary-600 transition-colors duration-200">
+              {hasAgent.metadata.full_name}
+            </a>
+          </p>
+          {hasAgent.metadata.phone && (
+            <p class="text-xs text-secondary-600">
+              <a href={`tel:${hasAgent.metadata.phone}`} class="hover:text-primary-600 transition-colors duration-200">
+                {hasAgent.metadata.phone}
+              </a>
+            </p>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+</div>

@@ -24,8 +24,13 @@ const price = metadata.price;
 const bedrooms = metadata.bedrooms;
 const bathrooms = metadata.bathrooms;
 const square_feet = metadata.square_feet;
-const property_type = metadata.property_type?.value || metadata.property_type;
-const status = metadata.property_status?.value || metadata.status;
+// Fix: Handle union type properly with type guard
+const property_type = typeof metadata.property_type === 'object' && metadata.property_type?.value 
+	? metadata.property_type.value 
+	: metadata.property_type;
+const status = typeof metadata.property_status === 'object' && metadata.property_status?.value
+	? metadata.property_status.value
+	: metadata.status || 'Available';
 const description = metadata.description;
 const gallery = metadata.gallery || []; // Fix: Use gallery instead of images
 const address = metadata.address;

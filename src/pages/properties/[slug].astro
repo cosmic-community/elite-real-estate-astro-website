@@ -18,20 +18,18 @@ if (!property) {
 	return Astro.redirect('/404');
 }
 
-// Fix: Proper destructuring syntax
+// Fix: Proper variable declarations and destructuring
 const { title, metadata } = property;
-const {
-	price,
-	bedrooms,
-	bathrooms,
-	square_feet,
-	property_type,
-	status,
-	description,
-	images,
-	address,
-	listing_agent
-} = metadata;
+const price = metadata.price;
+const bedrooms = metadata.bedrooms;
+const bathrooms = metadata.bathrooms;
+const square_feet = metadata.square_feet;
+const property_type = metadata.property_type;
+const status = metadata.status;
+const description = metadata.description;
+const images = metadata.images;
+const address = metadata.address;
+const listing_agent = metadata.listing_agent;
 
 const formattedPrice = new Intl.NumberFormat('en-US', {
 	style: 'currency',

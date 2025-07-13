@@ -3,7 +3,6 @@ import Layout from '../../layouts/Layout.astro';
 import { cosmic } from '../../lib/cosmic';
 
 let aboutContent: any = null;
-let error: string | null = null;
 
 try {
   const response = await cosmic.objects
@@ -11,12 +10,11 @@ try {
     .props(['title', 'content', 'metadata'])
     .depth(1);
   aboutContent = response.object;
-} catch (e) {
-  if (e.status === 404) {
+} catch (e: unknown) {
+  if (e && typeof e === 'object' && 'status' in e && (e as any).status === 404) {
     aboutContent = null;
   } else {
     console.error('Error fetching about content:', e);
-    error = 'Failed to load page content';
   }
 }
 

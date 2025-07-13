@@ -13,8 +13,8 @@ try {
     .props(['title', 'slug', 'metadata'])
     .depth(1);
   agents = response.objects;
-} catch (e) {
-  if (e.status === 404) {
+} catch (e: unknown) {
+  if (e && typeof e === 'object' && 'status' in e && (e as any).status === 404) {
     agents = [];
   } else {
     console.error('Error fetching agents:', e);

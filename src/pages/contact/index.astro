@@ -266,9 +266,10 @@ import Layout from '../../layouts/Layout.astro';
         return;
       }
       
-      // Email validation
+      // Email validation with proper type checking
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email)) {
+      const emailValue = data.email;
+      if (typeof emailValue === 'string' && !emailRegex.test(emailValue)) {
         alert('Please enter a valid email address.');
         return;
       }

@@ -2,8 +2,9 @@ import { createBucketClient } from '@cosmicjs/sdk';
 import type { Property, Agent, Office, AboutPage } from '../types';
 
 const cosmic = createBucketClient({
-  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG || 'real-estate-production',
-  readKey: import.meta.env.COSMIC_READ_KEY || 'a1CXVzlrA8llpCCG0ohEd1bhROTJwpJugqw5tyLLZJWQuyZVtn',
+  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+  readKey: import.meta.env.COSMIC_READ_KEY,
+  apiEnvironment: "staging",
 });
 
 export async function getProperties(): Promise<Property[]> {

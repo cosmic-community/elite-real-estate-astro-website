@@ -1,0 +1,262 @@
+---
+import { createBucketClient } from '@cosmicjs/sdk';
+import Layout from '../../layouts/Layout.astro';
+import PropertyCard from '../../components/PropertyCard.astro';
+import type { Agent, Property, Office } from '../../types';
+
+export async function getStaticPaths() {
+  const cosmic = createBucketClient({
+    bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+    readKey: import.meta.env.COSMIC_READ_KEY,
+  });
+
+  try {
+    const response = await cosmic.objects
+      .find({ type: 'agents' })
+      .props(['slug'])
+      .depth(0);
+
+    return response.objects.map((agent) => ({
+      params: { slug: agent.slug },
+    }));
+  } catch (error) {
+    console.error('Error fetching agents for static paths:', error);
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+
+const cosmic = createBucketClient({
+  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+  readKey: import.meta.env.COSMIC_READ_KEY,
+});
+
+let agent: Agent | null = null;
+let agentProperties: Property[] = [];
+let error: string | null = null;
+
+try {
+  // Fetch agent details
+  const agentResponse = await cosmic.objects
+    .findOne({ type: 'agents', slug })
+    .props(['id', 'title', 'slug', 'metadata'])
+    .depth(1);
+  
+  agent = agentResponse.object as Agent;
+
+  // Fetch properties listed by this agent
+  try {
+    const propertiesResponse = await cosmic.objects
+      .find({ 
+        type: 'properties',
+        'metadata.listing_agent': agent.id 
+      })
+      .props(['id', 'title', 'slug', 'metadata'])
+      .depth(1);
+    
+    agentProperties = propertiesResponse.objects as Property[];
+  } catch (propertiesError) {
+    // If no properties found, that's ok - just continue with empty array
+    console.log('No properties found for agent:', slug);
+    agentProperties = [];
+  }
+} catch (err) {
+  console.error('Error fetching agent:', err);
+  error = 'Agent not found';
+}
+
+if (!agent) {
+  return Astro.redirect('/404');
+}
+
+const office = agent.metadata.office as Office | undefined;
+---
+
+<Layout title={agent.metadata.full_name}>
+  <main class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <section class="bg-white py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <!-- Agent Photo -->
+          <div class="flex justify-center lg:justify-start">
+            {agent.metadata.photo ? (
+              <img 
+                src={`${agent.metadata.photo.imgix_url}?w=400&h=400&fit=crop&auto=format,compress`}
+                alt={agent.metadata.full_name}
+                class="w-80 h-80 rounded-2xl object-cover shadow-lg"
+              />
+            ) : (
+              <div class="w-80 h-80 bg-gray-300 rounded-2xl flex items-center justify-center shadow-lg">
+                <span class="text-gray-600 text-6xl font-bold">
+                  {agent.metadata.full_name.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <!-- Agent Info -->
+          <div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              {agent.metadata.full_name}
+            </h1>
+            
+            {agent.metadata.specialties && agent.metadata.specialties.length > 0 && (
+              <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">Specialties</h2>
+                <div class="flex flex-wrap gap-2">
+                  {agent.metadata.specialties.map((specialty: string) => (
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {specialty}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {agent.metadata.bio && (
+              <div class="mb-8">
+                <p class="text-lg text-gray-700 leading-relaxed">
+                  {agent.metadata.bio}
+                </p>
+              </div>
+            )}
+
+            <!-- Contact Information -->
+            <div class="space-y-4">
+              <h3 class="text-xl font-semibold text-gray-900">Contact Information</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {agent.metadata.phone && (
+                  <a 
+                    href={`tel:${agent.metadata.phone}`}
+                    class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <div>
+                      <p class="font-medium text-gray-900">Phone</p>
+                      <p class="text-blue-600">{agent.metadata.phone}</p>
+                    </div>
+                  </a>
+                )}
+
+                {agent.metadata.email && (
+                  <a 
+                    href={`mailto:${agent.metadata.email}`}
+                    class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                  >
+                    <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <div>
+                      <p class="font-medium text-gray-900">Email</p>
+                      <p class="text-green-600">{agent.metadata.email}</p>
+                    </div>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Office Information -->
+    {office && (
+      <section class="bg-gray-100 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="bg-white rounded-lg shadow-sm p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Office Information</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Office Name</h3>
+                <p class="text-gray-700">{office.metadata.office_name}</p>
+              </div>
+              
+              {office.metadata.address && (
+                <div>
+                  <h3 class="font-semibold text-gray-900 mb-2">Address</h3>
+                  <p class="text-gray-700 whitespace-pre-line">{office.metadata.address}</p>
+                </div>
+              )}
+              
+              {office.metadata.phone && (
+                <div>
+                  <h3 class="font-semibold text-gray-900 mb-2">Office Phone</h3>
+                  <a href={`tel:${office.metadata.phone}`} class="text-blue-600 hover:text-blue-800">
+                    {office.metadata.phone}
+                  </a>
+                </div>
+              )}
+              
+              {office.metadata.service_areas && (
+                <div class="md:col-span-2 lg:col-span-3">
+                  <h3 class="font-semibold text-gray-900 mb-2">Service Areas</h3>
+                  <p class="text-gray-700">{office.metadata.service_areas}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Agent's Listings -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Current Listings
+          </h2>
+          <p class="text-xl text-gray-600">
+            Properties currently listed by {agent.metadata.full_name}
+          </p>
+        </div>
+
+        {agentProperties.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {agentProperties.map((property) => (
+              <PropertyCard property={property} />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No Current Listings</h3>
+            <p class="text-gray-600 mb-6">
+              {agent.metadata.full_name} doesn't have any active listings at the moment.
+            </p>
+            <a 
+              href="/properties"
+              class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+              View All Properties
+              <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Back to Agents -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <a 
+        href="/agents"
+        class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+      >
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        Back to Agents
+      </a>
+    </section>
+  </main>
+</Layout>

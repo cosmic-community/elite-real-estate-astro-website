@@ -1,0 +1,296 @@
+---
+import { createBucketClient } from '@cosmicjs/sdk';
+import Layout from '../../layouts/Layout.astro';
+import type { Property, Agent } from '../../types';
+import { formatPrice, formatSquareFeet } from '../../types';
+
+export async function getStaticPaths() {
+  const cosmic = createBucketClient({
+    bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+    readKey: import.meta.env.COSMIC_READ_KEY,
+  });
+
+  try {
+    const response = await cosmic.objects
+      .find({ type: 'properties' })
+      .props(['slug'])
+      .depth(0);
+
+    return response.objects.map((property) => ({
+      params: { slug: property.slug },
+    }));
+  } catch (error) {
+    console.error('Error fetching properties for static paths:', error);
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+
+const cosmic = createBucketClient({
+  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+  readKey: import.meta.env.COSMIC_READ_KEY,
+});
+
+let property: Property | null = null;
+let error: string | null = null;
+
+try {
+  const response = await cosmic.objects
+    .findOne({ type: 'properties', slug })
+    .props(['id', 'title', 'slug', 'metadata'])
+    .depth(1);
+  
+  property = response.object as Property;
+} catch (err) {
+  console.error('Error fetching property:', err);
+  error = 'Property not found';
+}
+
+if (!property) {
+  return Astro.redirect('/404');
+}
+
+const agent = property.metadata.listing_agent as Agent | undefined;
+---
+
+<Layout title={property.title}>
+  <main class="min-h-screen bg-gray-50">
+    <!-- Hero Section with Property Images -->
+    <section class="relative">
+      {property.metadata.gallery && property.metadata.gallery.length > 0 ? (
+        <div class="w-full h-96 md:h-[500px] overflow-hidden">
+          <img 
+            src={`${property.metadata.gallery[0].imgix_url}?w=1200&h=500&fit=crop&auto=format,compress`}
+            alt={property.title}
+            class="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div class="w-full h-96 md:h-[500px] bg-gray-300 flex items-center justify-center">
+          <span class="text-gray-500 text-lg">No image available</span>
+        </div>
+      )}
+      
+      <!-- Property Status Badge -->
+      <div class="absolute top-6 left-6">
+        <span class={`px-4 py-2 rounded-full text-sm font-semibold ${
+          property.metadata.property_status.key === 'sale' 
+            ? 'bg-green-600 text-white' 
+            : property.metadata.property_status.key === 'rent'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-600 text-white'
+        }`}>
+          {property.metadata.property_status.value}
+        </span>
+      </div>
+    </section>
+
+    <!-- Property Details -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+          <!-- Property Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              {property.title}
+            </h1>
+            <p class="text-xl text-gray-600 mb-4">
+              {property.metadata.address}
+            </p>
+            <p class="text-3xl font-bold text-blue-600">
+              {formatPrice(property.metadata.price)}
+            </p>
+          </div>
+
+          <!-- Property Stats -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-6 bg-white rounded-lg shadow-sm">
+            <div class="text-center">
+              <p class="text-2xl font-bold text-gray-900">{property.metadata.bedrooms}</p>
+              <p class="text-sm text-gray-600">Bedrooms</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-bold text-gray-900">{property.metadata.bathrooms}</p>
+              <p class="text-sm text-gray-600">Bathrooms</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-bold text-gray-900">
+                {property.metadata.square_feet ? formatSquareFeet(property.metadata.square_feet) : 'N/A'}
+              </p>
+              <p class="text-sm text-gray-600">Sq Ft</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-bold text-gray-900">{property.metadata.property_type.value}</p>
+              <p class="text-sm text-gray-600">Type</p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          {property.metadata.description && (
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+              <div class="prose prose-lg text-gray-700">
+                <p>{property.metadata.description}</p>
+              </div>
+            </div>
+          )}
+
+          <!-- Features -->
+          {property.metadata.features && property.metadata.features.length > 0 && (
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 mb-4">Features</h2>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {property.metadata.features.map((feature: string) => (
+                  <div class="flex items-center">
+                    <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-gray-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Gallery -->
+          {property.metadata.gallery && property.metadata.gallery.length > 1 && (
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 mb-4">Gallery</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {property.metadata.gallery.slice(1).map((image, index) => (
+                  <div class="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
+                    <img 
+                      src={`${image.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`}
+                      alt={`${property.title} - Image ${index + 2}`}
+                      class="w-full h-64 object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+          <!-- Contact Form / Agent Info -->
+          {agent && (
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Contact Agent</h3>
+              
+              <div class="flex items-center mb-4">
+                {agent.metadata.photo ? (
+                  <img 
+                    src={`${agent.metadata.photo.imgix_url}?w=100&h=100&fit=crop&auto=format,compress`}
+                    alt={agent.metadata.full_name}
+                    class="w-16 h-16 rounded-full object-cover mr-4"
+                  />
+                ) : (
+                  <div class="w-16 h-16 bg-gray-300 rounded-full mr-4 flex items-center justify-center">
+                    <span class="text-gray-600 font-semibold">
+                      {agent.metadata.full_name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <h4 class="font-semibold text-gray-900">{agent.metadata.full_name}</h4>
+                  {agent.metadata.phone && (
+                    <p class="text-sm text-gray-600">{agent.metadata.phone}</p>
+                  )}
+                  {agent.metadata.email && (
+                    <p class="text-sm text-gray-600">{agent.metadata.email}</p>
+                  )}
+                </div>
+              </div>
+
+              {agent.metadata.specialties && agent.metadata.specialties.length > 0 && (
+                <div class="mb-4">
+                  <p class="text-sm font-medium text-gray-900 mb-2">Specialties:</p>
+                  <div class="flex flex-wrap gap-1">
+                    {agent.metadata.specialties.map((specialty: string) => (
+                      <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        {specialty}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div class="space-y-3">
+                {agent.metadata.phone && (
+                  <a 
+                    href={`tel:${agent.metadata.phone}`}
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors block text-center"
+                  >
+                    Call Now
+                  </a>
+                )}
+                {agent.metadata.email && (
+                  <a 
+                    href={`mailto:${agent.metadata.email}?subject=Inquiry about ${property.title}`}
+                    class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors block text-center"
+                  >
+                    Send Email
+                  </a>
+                )}
+                <a 
+                  href={`/agents/${agent.slug}`}
+                  class="w-full border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors block text-center"
+                >
+                  View Agent Profile
+                </a>
+              </div>
+            </div>
+          )}
+
+          <!-- Quick Stats Card -->
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Property Details</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Price:</span>
+                <span class="font-semibold">{formatPrice(property.metadata.price)}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Type:</span>
+                <span class="font-semibold">{property.metadata.property_type.value}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Bedrooms:</span>
+                <span class="font-semibold">{property.metadata.bedrooms}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Bathrooms:</span>
+                <span class="font-semibold">{property.metadata.bathrooms}</span>
+              </div>
+              {property.metadata.square_feet && (
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Square Feet:</span>
+                  <span class="font-semibold">{formatSquareFeet(property.metadata.square_feet)}</span>
+                </div>
+              )}
+              <div class="flex justify-between">
+                <span class="text-gray-600">Status:</span>
+                <span class="font-semibold">{property.metadata.property_status.value}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Back to Properties -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <a 
+        href="/properties"
+        class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+      >
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        Back to Properties
+      </a>
+    </section>
+  </main>
+</Layout>

@@ -16,7 +16,7 @@ export async function getStaticPaths() {
       .props(['slug'])
       .depth(0);
 
-    return response.objects.map((agent) => ({
+    return response.objects.map((agent: any) => ({
       params: { slug: agent.slug },
     }));
   } catch (error) {
@@ -34,7 +34,6 @@ const cosmic = createBucketClient({
 
 let agent: Agent | null = null;
 let agentProperties: Property[] = [];
-let error: string | null = null;
 
 try {
   // Fetch agent details
@@ -63,7 +62,6 @@ try {
   }
 } catch (err) {
   console.error('Error fetching agent:', err);
-  error = 'Agent not found';
 }
 
 if (!agent) {

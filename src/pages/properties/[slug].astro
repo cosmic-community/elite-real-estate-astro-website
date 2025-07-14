@@ -3,7 +3,6 @@
 import Layout from '../../layouts/Layout.astro';
 import { getProperty, getProperties } from '../../lib/cosmic';
 import type { Property, ImageObject } from '../../types';
-import { formatPrice, formatSquareFeet } from '../../types';
 
 export async function getStaticPaths() {
 	const properties = await getProperties();
@@ -11,6 +10,21 @@ export async function getStaticPaths() {
 		params: { slug: property.slug },
 		props: { property }
 	}));
+}
+
+// Helper functions for formatting
+function formatPrice(price: number): string {
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0,
+	}).format(price);
+}
+
+function formatSquareFeet(sqft: number | null | undefined): string {
+	if (!sqft) return 'N/A';
+	return new Intl.NumberFormat('en-US').format(sqft);
 }
 
 const { slug } = Astro.params;
@@ -30,7 +44,7 @@ const property_type = typeof metadata.property_type === 'object' && metadata.pro
 	: metadata.property_type;
 const status = typeof metadata.property_status === 'object' && metadata.property_status?.value
 	? metadata.property_status.value
-	: metadata.status || 'Available';
+	: metadata.property_status || 'Available';
 const description = metadata.description;
 const gallery = metadata.gallery || [];
 const address = metadata.address;

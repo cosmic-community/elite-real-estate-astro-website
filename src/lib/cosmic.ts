@@ -7,6 +7,10 @@ const cosmic = createBucketClient({
   apiEnvironment: "staging",
 });
 
+// Export the createBucketClient function and cosmic client
+export { createBucketClient };
+export { cosmic };
+
 export async function getProperties(): Promise<Property[]> {
   try {
     const response = await cosmic.objects

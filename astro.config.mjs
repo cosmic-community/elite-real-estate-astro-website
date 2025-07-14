@@ -12,6 +12,10 @@ export default defineConfig({
     port: 3000,
     host: true
   },
+  trailingSlash: 'ignore',
+  build: {
+    format: 'directory'
+  },
   vite: {
     define: {
       'process.env.COSMIC_BUCKET_SLUG': JSON.stringify(process.env.COSMIC_BUCKET_SLUG),

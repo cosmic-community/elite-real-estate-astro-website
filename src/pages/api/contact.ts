@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
         phone: phone || '',
         interest: interest || '',
         message: message,
-        submitted_at: new Date().toISOString()
+        submitted_at: new Date().toISOString().split("T", 1)[0]
       }
     };
 

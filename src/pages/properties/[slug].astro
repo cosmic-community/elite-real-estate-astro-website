@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const property = await getProperty(slug as string);
+const { property } = Astro.props;
 
 if (!property) {
   return Astro.redirect('/properties');
@@ -27,18 +27,26 @@ if (!property) {
       <div class="max-w-6xl mx-auto">
         <!-- Property Images -->
         <div class="mb-8">
-          <img 
-            src={property.metadata.image?.imgix_url ? `${property.metadata.image.imgix_url}?w=1200&h=600&fit=crop&auto=format,compress` : '/placeholder-property.jpg'} 
-            alt={property.title}
-            class="w-full h-96 object-cover rounded-lg shadow-lg"
-          />
+          {property.metadata.gallery && property.metadata.gallery.length > 0 ? (
+            <img 
+              src={`${property.metadata.gallery[0].imgix_url}?w=1200&h=600&fit=crop&auto=format,compress`} 
+              alt={property.title}
+              class="w-full h-96 object-cover rounded-lg shadow-lg"
+            />
+          ) : (
+            <img 
+              src="/placeholder-property.jpg"
+              alt={property.title}
+              class="w-full h-96 object-cover rounded-lg shadow-lg"
+            />
+          )}
         </div>
 
         <!-- Property Details -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <h1 class="text-4xl font-bold mb-4">{property.title}</h1>
-            <p class="text-xl text-gray-600 mb-6">{property.metadata.location}</p>
+            <p class="text-xl text-gray-600 mb-6">{property.metadata.address}</p>
             
             <div class="bg-gray-50 p-6 rounded-lg mb-6">
               <h2 class="text-2xl font-semibold mb-4">Property Details</h2>
@@ -48,6 +56,10 @@ if (!property) {
                   <span class="text-2xl font-bold text-blue-600">${property.metadata.price?.toLocaleString()}</span>
                 </div>
                 <div>
+                  <span class="font-medium">Type:</span>
+                  <span>{typeof property.metadata.property_type === 'object' ? property.metadata.property_type.value : property.metadata.property_type}</span>
+                </div>
+                <div>
                   <span class="font-medium">Bedrooms:</span>
                   <span>{property.metadata.bedrooms}</span>
                 </div>
@@ -55,10 +67,12 @@ if (!property) {
                   <span class="font-medium">Bathrooms:</span>
                   <span>{property.metadata.bathrooms}</span>
                 </div>
-                <div>
-                  <span class="font-medium">Square Feet:</span>
-                  <span>{property.metadata.square_feet}</span>
-                </div>
+                {property.metadata.square_feet && (
+                  <div>
+                    <span class="font-medium">Square Feet:</span>
+                    <span>{property.metadata.square_feet.toLocaleString()}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -73,7 +87,7 @@ if (!property) {
               <div class="mb-6">
                 <h2 class="text-2xl font-semibold mb-4">Features</h2>
                 <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {property.metadata.features.map((feature) => (
+                  {property.metadata.features.map((feature: string) => (
                     <li class="flex items-center">
                       <span class="text-blue-600 mr-2">✓</span>
                       {feature}

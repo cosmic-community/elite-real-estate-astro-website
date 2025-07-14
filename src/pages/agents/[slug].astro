@@ -1,27 +1,26 @@
-// src/pages/agents/[slug].astro
 ---
 import Layout from '../../layouts/Layout.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
 import { getAgent, getAgents, getPropertiesByAgent } from '../../lib/cosmic';
-import type { Agent } from '../../types';
+import type { Agent, Property } from '../../types';
 
 export async function getStaticPaths() {
   const agents = await getAgents();
   
-  return agents.map((agent) => ({
+  return agents.map((agent: Agent) => ({
     params: { slug: agent.slug },
     props: { agent },
   }));
 }
 
 const { slug } = Astro.params;
-const { agent } = Astro.props;
+const { agent } = Astro.props as { agent: Agent };
 
 if (!agent) {
   return Astro.redirect('/agents');
 }
 
-const properties = await getPropertiesByAgent(agent.id);
+const properties: Property[] = await getPropertiesByAgent(agent.id);
 ---
 
 <Layout title={`${agent.title} - Elite Real Estate`}>
@@ -91,7 +90,7 @@ const properties = await getPropertiesByAgent(agent.id);
           
           {properties.length > 0 ? (
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {properties.map((property) => (
+              {properties.map((property: Property) => (
                 <PropertyCard property={property} />
               ))}
             </div>

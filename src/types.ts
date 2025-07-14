@@ -19,7 +19,7 @@ export interface CosmicObject {
 export interface Property extends CosmicObject {
   metadata: {
     address: string
-    location: string
+    location?: string
     price: number
     bedrooms: number
     bathrooms: number

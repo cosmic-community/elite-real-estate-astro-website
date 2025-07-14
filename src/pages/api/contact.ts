@@ -5,8 +5,8 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const formData = await request.formData();
     
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
+    const firstName = formData.get('first-name') as string;
+    const lastName = formData.get('last-name') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
     const interest = formData.get('interest') as string;
@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
         phone: phone || '',
         interest: interest || '',
         message: message,
-        submitted_at: new Date().toISOString().split("T", 1)[0]
+        submitted_at: new Date().toISOString()
       }
     };
 

@@ -7,8 +7,15 @@ const cosmic = createBucketClient({
   apiEnvironment: "staging",
 });
 
-// Export the createBucketClient function and cosmic client
-export { createBucketClient };
+// Create a separate client for server-side operations with write access
+export const cosmicClient = createBucketClient({
+  bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
+  readKey: import.meta.env.COSMIC_READ_KEY,
+  writeKey: import.meta.env.COSMIC_WRITE_KEY,
+  apiEnvironment: "staging",
+});
+
+// Export the read-only cosmic client
 export { cosmic };
 
 export async function getProperties(): Promise<Property[]> {

@@ -96,3 +96,25 @@ export interface Value {
   description: string;
   icon: string;
 }
+
+// Utility functions
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+}
+
+export function formatSquareFeet(sqft: number): string {
+  return new Intl.NumberFormat('en-US').format(sqft);
+}
+
+export function getPropertyType(propertyType: SelectOption): string {
+  return propertyType?.value || 'Unknown';
+}
+
+export function getPropertyStatus(propertyStatus: SelectOption): string {
+  return propertyStatus?.value || 'Unknown';
+}

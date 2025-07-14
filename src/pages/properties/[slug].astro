@@ -7,14 +7,17 @@ import type { Property } from '../../types';
 export async function getStaticPaths() {
   const properties = await getProperties();
   
-  return properties.map((property) => ({
+  return properties.map((property: Property) => ({
     params: { slug: property.slug },
     props: { property },
   }));
 }
 
-const { slug } = Astro.params;
-const { property } = Astro.props;
+interface Props {
+  property: Property;
+}
+
+const { property } = Astro.props as Props;
 
 if (!property) {
   return Astro.redirect('/properties');

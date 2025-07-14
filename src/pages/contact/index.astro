@@ -25,7 +25,28 @@ import Layout from '../../layouts/Layout.astro';
             <h2 class="text-3xl font-bold text-secondary-800 mb-6">
               Send Us a Message
             </h2>
-            <form class="space-y-6" action="#" method="POST">
+            
+            <!-- Success Message -->
+            <div id="success-message" class="hidden mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-green-800">Thank you for your message! We'll get back to you within 24 hours.</p>
+              </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div id="error-message" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <p class="text-red-800" id="error-text">Something went wrong. Please try again.</p>
+              </div>
+            </div>
+            
+            <form id="contact-form" class="space-y-6" action="/api/contact" method="POST">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label for="first-name" class="block text-sm font-medium text-secondary-700 mb-2">
@@ -88,11 +109,11 @@ import Layout from '../../layouts/Layout.astro';
                   class="w-full px-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
                 >
                   <option value="">Select an option</option>
-                  <option value="buying">Buying a Home</option>
-                  <option value="selling">Selling a Home</option>
-                  <option value="investing">Investment Properties</option>
-                  <option value="renting">Rental Properties</option>
-                  <option value="consultation">General Consultation</option>
+                  <option value="Buying a Home">Buying a Home</option>
+                  <option value="Selling a Home">Selling a Home</option>
+                  <option value="Investment Properties">Investment Properties</option>
+                  <option value="Rental Properties">Rental Properties</option>
+                  <option value="General Consultation">General Consultation</option>
                 </select>
               </div>
 
@@ -112,9 +133,17 @@ import Layout from '../../layouts/Layout.astro';
 
               <button
                 type="submit"
-                class="w-full btn-primary py-4 text-lg font-semibold"
+                id="submit-btn"
+                class="w-full btn-primary py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Message
+                <span id="submit-text">Send Message</span>
+                <span id="submit-loading" class="hidden">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sending...
+                </span>
               </button>
             </form>
           </div>
@@ -251,35 +280,65 @@ import Layout from '../../layouts/Layout.astro';
 
 <script>
   // Form submission handler
-  const form = document.querySelector('form');
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const submitText = document.getElementById('submit-text') as HTMLSpanElement;
+  const submitLoading = document.getElementById('submit-loading') as HTMLSpanElement;
+  const successMessage = document.getElementById('success-message') as HTMLDivElement;
+  const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+  const errorText = document.getElementById('error-text') as HTMLParagraphElement;
+
   if (form) {
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      // Get form data
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
+      // Hide previous messages
+      successMessage.classList.add('hidden');
+      errorMessage.classList.add('hidden');
       
-      // Basic validation
-      if (!data['first-name'] || !data['last-name'] || !data.email || !data.message) {
-        alert('Please fill in all required fields.');
-        return;
+      // Show loading state
+      submitBtn.disabled = true;
+      submitText.classList.add('hidden');
+      submitLoading.classList.remove('hidden');
+      
+      try {
+        const formData = new FormData(form);
+        
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          // Show success message
+          successMessage.classList.remove('hidden');
+          form.reset();
+          
+          // Scroll to success message
+          successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          // Show error message
+          errorText.textContent = result.error || 'Something went wrong. Please try again.';
+          errorMessage.classList.remove('hidden');
+          
+          // Scroll to error message
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        errorText.textContent = 'Network error. Please check your connection and try again.';
+        errorMessage.classList.remove('hidden');
+        
+        // Scroll to error message
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } finally {
+        // Reset loading state
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
       }
-      
-      // Email validation with proper type checking
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const emailValue = data.email;
-      if (typeof emailValue === 'string' && !emailRegex.test(emailValue)) {
-        alert('Please enter a valid email address.');
-        return;
-      }
-      
-      // Here you would typically send the data to your backend
-      console.log('Form data:', data);
-      alert('Thank you for your message! We\'ll get back to you soon.');
-      
-      // Reset form
-      form.reset();
     });
   }
 </script>

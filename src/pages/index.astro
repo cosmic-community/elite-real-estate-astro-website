@@ -1,32 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { cosmic } from '../lib/cosmic';
+import { getProperties, getAgents } from '../lib/cosmic';
 import type { Property, Agent } from '../types';
 
-let properties: Property[] = [];
-let agents: Agent[] = [];
-
-try {
-  const propertiesResponse = await cosmic.objects.find({
-    type: 'properties'
-  }).props(['title', 'slug', 'metadata']).depth(1);
-  
-  properties = propertiesResponse.objects || [];
-} catch (error) {
-  console.error('Error fetching properties:', error);
-  properties = [];
-}
-
-try {
-  const agentsResponse = await cosmic.objects.find({
-    type: 'agents'
-  }).props(['title', 'slug', 'metadata']).depth(1);
-  
-  agents = agentsResponse.objects || [];
-} catch (error) {
-  console.error('Error fetching agents:', error);
-  agents = [];
-}
+const properties = await getProperties();
+const agents = await getAgents();
 ---
 
 <Layout title="Elite Real Estate - Luxury Properties">

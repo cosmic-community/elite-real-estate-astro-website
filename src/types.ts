@@ -19,6 +19,7 @@ export interface CosmicObject {
 export interface Property extends CosmicObject {
   metadata: {
     address: string
+    location: string
     price: number
     bedrooms: number
     bathrooms: number
@@ -26,6 +27,7 @@ export interface Property extends CosmicObject {
     property_type: string | { key: string; value: string }
     description?: string
     features?: string[]
+    image?: CosmicImage
     gallery?: CosmicImage[]
     property_status: string | { key: string; value: string }
     listing_agent?: Agent
@@ -35,6 +37,7 @@ export interface Property extends CosmicObject {
 export interface Agent extends CosmicObject {
   metadata: {
     full_name: string
+    title?: string
     bio?: string
     phone?: string
     email?: string

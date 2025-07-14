@@ -2,37 +2,26 @@
 import Layout from '../../layouts/Layout.astro';
 import AgentCard from '../../components/AgentCard.astro';
 import { getAgents } from '../../lib/cosmic';
-import type { Agent } from '../../types';
 
 const agents = await getAgents();
 ---
 
-<Layout title="Our Agents - Elite Real Estate">
-	<main>
-		<!-- Page Header -->
-		<section class="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
-			<div class="max-w-7xl mx-auto px-4">
-				<h1 class="text-4xl md:text-5xl font-bold mb-4">Our Expert Agents</h1>
-				<p class="text-xl">Meet our experienced team of luxury real estate professionals</p>
-			</div>
-		</section>
-
-		<!-- Agents Grid -->
-		<section class="py-16">
-			<div class="max-w-7xl mx-auto px-4">
-				{agents.length > 0 ? (
-					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{agents.map((agent: Agent) => (
-							<AgentCard agent={agent} />
-						))}
-					</div>
-				) : (
-					<div class="text-center py-12">
-						<h2 class="text-2xl font-bold text-gray-900 mb-4">No Agents Available</h2>
-						<p class="text-gray-600 text-lg">Please check back later for agent information.</p>
-					</div>
-				)}
-			</div>
-		</section>
-	</main>
+<Layout title="Agents - Elite Real Estate">
+  <main>
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-4xl font-bold text-center mb-12">Our Agents</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {agents.map((agent) => (
+          <AgentCard agent={agent} />
+        ))}
+      </div>
+      
+      {agents.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-gray-600 text-lg">No agents found.</p>
+        </div>
+      )}
+    </div>
+  </main>
 </Layout>
